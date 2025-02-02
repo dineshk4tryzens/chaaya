@@ -1,0 +1,25 @@
+Consumer Key: Xv8QhsPJSpJRszlEbEijvRpsZJYbQhoUh0HIRlBT
+Consumer Secret: qQ23MRDJXw4Z2WvU1DnWPjWv2uuv6pyOUNyM1cyd
+
+Your API key: JyLOkVUKhuxH4KiqfBILbogd2rUNTzmLsj2ItSNf
+To use this key, provide it as a Bearer token in the Authorization header when making requests to the Splitwise API.
+
+Request Token URL
+https://secure.splitwise.com/oauth/request_token
+
+Access Token URL
+https://secure.splitwise.com/oauth/access_token
+
+Authorize URL
+https://secure.splitwise.com/oauth/authorize
+
+
+OAuth 2.0
+
+Token URL
+https://secure.splitwise.com/oauth/token
+
+Authorize URL
+https://secure.splitwise.com/oauth/authorize
+
+
