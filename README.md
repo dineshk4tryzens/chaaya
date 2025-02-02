@@ -1,4 +1,4 @@
-# Welcome to Remix!
+# Welcome to The Chaaya App made on Remix!
 
 - 📖 [Remix docs](https://remix.run/docs)
 
