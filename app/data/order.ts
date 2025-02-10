@@ -128,131 +128,72 @@ export async function GetOrders(request: Request) {
 
 export async function GetTodaysConsolidatedOrder() {
   const data = await GetTodaysOrder();
-  /**const itemDetails = data.reduce((details, obj) => {
+  const drinkDetails = Constants.Drinks;
+  const itemDetails = data.reduce((details, obj) => {
     const { item } = obj.orderDetails;
     const { email } = obj;
     if (!details[item]) {
-      details[item] = { count: 0, emails: new Set() };
+      details[item] = { count: 0, emails: new Set(), parent: undefined };
     }
     details[item].count += 1;
     details[item].emails.add(getNameFromEmail(email));
+    details[item].parent = (drinkDetails[item as Drink] as DrinkDetails)?.parent
     return details;
   }, {});
-  const drinkDetails = Constants.Drinks;
+
   const resultOrderInWords = [];
   const processedKeys = new Set(); // Track processed items
+  const mergedLabels = new Set(); // To track merged parent labels
+  const labelCountMap = new Map(); // To track count for each label
 
-  // Process parent-child relationships
+  // Step 1: Process parent-child relationships
   for (const [key, detail] of Object.entries(itemDetails)) {
     if (processedKeys.has(key)) continue; // Skip if already processed
 
     const parent = (drinkDetails[key as Drink] as DrinkDetails)?.parent;
     const parentLabel = drinkDetails[parent as Drink]?.label;
     const childLabel = drinkDetails[key as Drink]?.label;
+
     if (parent && itemDetails[parent]) {
       // Combine parent and child
       const parentDetail = itemDetails[parent];
       const total = detail.count + parentDetail.count;
 
+      // Store the merged label and count
+      const mergedLabel = `${total} ${parentLabel} il ${detail.count} ${childLabel}`;
       resultOrderInWords.push({
-        // key: parent,
-        label: `${total} ${parentLabel} il ${detail.count} ${childLabel}`,
-        count: {
-          total,
-          // [key]: detail.count,
-          // [parent]: parentDetail.count,
-        },
-        // emails: {
-        //   [key]: Array.from(detail.emails),
-        //   [parent]: Array.from(parentDetail.emails),
-        // },
+        label: mergedLabel,
+        count: { total }
       });
 
       processedKeys.add(key);
       processedKeys.add(parent);
+      mergedLabels.add(parentLabel); // Mark the parent as merged
+      labelCountMap.set(parentLabel, total); // Track merged counts
     } else if (!processedKeys.has(key)) {
       // Standalone item
       resultOrderInWords.push({
-        // key,
         label: `${detail.count} ${childLabel}`,
-        count: {
-          total: detail.count,
-          // [key]: detail.count
-        },
-        // emails: { [key]: Array.from(detail.emails) },
+        count: { total: detail.count }
       });
+
       processedKeys.add(key);
     }
-  } **/
-   
-    const itemDetails = data.reduce((details, obj) => {
-      const { item } = obj.orderDetails;
-      const { email } = obj;
-      if (!details[item]) {
-        details[item] = { count: 0, emails: new Set() };
-      }
-      details[item].count += 1;
-      details[item].emails.add(getNameFromEmail(email));
-      return details;
-    }, {});
-    
-    const drinkDetails = Constants.Drinks;
-    const resultOrderInWords = [];
-    const processedKeys = new Set(); // Track processed items
-    const mergedLabels = new Set(); // To track merged parent labels
-    const labelCountMap = new Map(); // To track count for each label
-    
-    // Step 1: Process parent-child relationships
-    for (const [key, detail] of Object.entries(itemDetails)) {
-      if (processedKeys.has(key)) continue; // Skip if already processed
-    
-      const parent = (drinkDetails[key as Drink] as DrinkDetails)?.parent;
-      const parentLabel = drinkDetails[parent as Drink]?.label;
-      const childLabel = drinkDetails[key as Drink]?.label;
-    
-      if (parent && itemDetails[parent]) {
-        // Combine parent and child
-        const parentDetail = itemDetails[parent];
-        const total = detail.count + parentDetail.count;
-    
-        // Store the merged label and count
-        const mergedLabel = `${total} ${parentLabel} il ${detail.count} ${childLabel}`;
-        resultOrderInWords.push({
-          label: mergedLabel,
-          count: { total }
-        });
-    
-        processedKeys.add(key);
-        processedKeys.add(parent);
-        mergedLabels.add(parentLabel); // Mark the parent as merged
-        labelCountMap.set(parentLabel, total); // Track merged counts
-      } else if (!processedKeys.has(key)) {
-        // Standalone item
-        resultOrderInWords.push({
-          label: `${detail.count} ${childLabel}`,
-          count: { total: detail.count }
-        });
-    
-        processedKeys.add(key);
-      }
+  }
+
+  // Step 2: Ensure merged labels appear and filter out unnecessary standalone items
+  const finalResult = resultOrderInWords.filter(({ label }) => {
+    // Extract the main label (parent label, which is the first word)
+    const mainLabel = label.split(' ')[1]; // e.g., 'Tea' from '6 Tea'
+
+    // Keep merged labels and exclude standalone ones that are already merged
+    if (label.includes('il')) {
+      return true; // Keep merged labels
     }
-    
-    // Step 2: Ensure merged labels appear and filter out unnecessary standalone items
-    const finalResult = resultOrderInWords.filter(({ label }) => {
-      // Extract the main label (parent label, which is the first word)
-      const mainLabel = label.split(' ')[1]; // e.g., 'Tea' from '6 Tea'
-    
-      // Keep merged labels and exclude standalone ones that are already merged
-      if (label.includes('il')) {
-        return true; // Keep merged labels
-      }
-    
-      // Exclude standalone labels already covered by merged labels
-      return !mergedLabels.has(mainLabel);
-    });
-    
-    // console.log(finalResult);
-    
+
+    // Exclude standalone labels already covered by merged labels
+    return !mergedLabels.has(mainLabel);
+  });
 
   // Separate into "common" and "unique"
   const result = Object.entries(itemDetails).reduce(
@@ -267,15 +208,71 @@ export async function GetTodaysConsolidatedOrder() {
     },
     { common: [], unique: [] }
   );
+
+  let totalPrice = 0
+  const pricePerItem: { itemName: string; itemPrice: number; }[] = []
   const commonDrinks = (result?.common.map((drink:  { item: Drink, count: number, emails: string[] }) => { return { ...Constants.Drinks[drink?.item], count: drink?.count, emails: drink?.emails, key: drink.item }}))
   const uniqueDrinks = (result?.unique.map((drink:  { item: Drink, count: number, emails: string[] }) => { return { ...Constants.Drinks[drink?.item], count: drink?.count, emails: drink?.emails, key: drink.item }}))
   const commonOrders: {label: string, count: number, emails: string[], key: string, price: number}[] = [];
   const uniqueOrders: {label: string, count: number, emails: string[], key: string, price: number}[] = [];
-  commonDrinks.map((drink) => commonOrders.push({ label: drink?.label, count: drink?.count, emails: drink?.emails, key: drink?.key, price: drink?.price }))
-  uniqueDrinks.map((drink) => uniqueOrders.push({ label: drink?.label, count: drink?.count, emails: drink?.emails, key: drink?.key, price: drink?.price }))
+  commonDrinks.map((drink) => {
+    totalPrice = totalPrice + drink?.count * drink?.price;
+    pricePerItem.push({ itemName: drink?.label, itemPrice: drink?.price })
+    return commonOrders.push({ label: drink?.label, count: drink?.count, emails: drink?.emails, key: drink?.key, price: drink?.price })})
+  uniqueDrinks.map((drink) => {
+    totalPrice = totalPrice + drink?.count * drink?.price;
+    pricePerItem.push({ itemName: drink?.label, itemPrice: drink?.price })
+    return uniqueOrders.push({ label: drink?.label, count: drink?.count, emails: drink?.emails, key: drink?.key, price: drink?.price })})
+
+//   const updatedItemDetails = itemDetails;
+//   const finalTotal: {
+//     label?: string;
+//     count?: number;
+//   } | unknown[] = [];
+// // Ensure all parent items exist and aggregate counts/emails
+// for (const key in itemDetails) {
+//   const { parent, count, emails } = itemDetails[key];
+
+//   if (parent) {
+//     // If parent doesn't exist in updatedItemDetails, initialize it
+//     if (!updatedItemDetails[parent]) {
+//       updatedItemDetails[parent] = {
+//         count: 0,
+//         emails: new Set(),
+//         parent: undefined
+//       };
+//     }
+
+//     // Merge child count into parent
+//     updatedItemDetails[parent].count += count;
+
+//     // Merge emails correctly using Set
+//     updatedItemDetails[parent].emails = new Set([
+//       ...updatedItemDetails[parent].emails || [],
+//       ...emails
+//     ]);
+//   }
+// }
+
+// // Convert Sets to Arrays for final output
+// const finalItemDetails = Object.fromEntries(
+//   Object.entries(updatedItemDetails).map(([key, item]) => [
+//     key,
+//     { ...item, emails: Array.from(item.emails) }
+//   ])
+// );
+
+//   Object.entries(finalItemDetails)?.map((x) => finalTotal.push({label: drinkDetails?.[x[0] as Drink]?.label, count: x[1]?.count}))
+//   console.log("🚀 ~ GetTodaysConsolidatedOrder ~ mergedItemDetails:", finalItemDetails)
+
   return {
     commonDrinks: commonOrders,
     uniqueDrinks: uniqueOrders,
-    resultOrderInWords: finalResult.sort((a, b) => b.count.total - a.count.total)
+    resultOrderInWords: finalResult.sort((a, b) => b.count.total - a.count.total),
+    priceDetails: {
+      total: totalPrice,
+      pricePerItem
+    },
+    // finalTotal
   };
 }

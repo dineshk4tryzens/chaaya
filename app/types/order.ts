@@ -69,4 +69,12 @@ export interface GetTodaysConsolidatedOrderResult {
   commonDrinks: ConsilatedDrinkFormat[];
   uniqueDrinks: ConsilatedDrinkFormat[];
   resultOrderInWords: ResultOrderInWords[];
+  priceDetails: {
+    total: number;
+    pricePerItem: {
+      itemName: string;
+      itemPrice: number;
+    }[]
+  };
+  finalTotal?: { label: string; count: number;}[] | unknown[]
 }

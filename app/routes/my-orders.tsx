@@ -9,6 +9,7 @@ import { Alert } from "@mui/material";
 import { GetOrders, Order } from "~/data/order";
 import { ViewOrders } from "~/components/ViewOrders";
 import { WithId } from "mongodb";
+import MainBackground from "~/components/main/Background";
 
 export async function action({ request }: ActionFunctionArgs) {
   const data = await Order(request);
@@ -95,9 +96,7 @@ export default function Index() {
 
   return (
     <div className={`flex h-screen flex-col`}>
-      <div
-        className={`flex h-screen flex-col bg-image-light bg-cover fixed overflow-y-scroll inset-0 z-10 transition-opacity duration-[750ms] ease-in-out opacity-95 visible bg-bottom md:bg-[cover] dark:bg-image-dark max-md:${(theme !== "dark") ? 'bg-x-0 bg-200-100' : 'bg-x-10 bg-170-100'}`}
-      >
+      <MainBackground theme={theme}>
         <div className="z-20 mr-12 ml-12 h-full">
           <NavBar>
             <div className="flex w-full justify-between flex-wrap">
@@ -145,7 +144,7 @@ export default function Index() {
           )}
           <ViewOrders orders={data?.orders} userId={id} closeEditOrderItemModal={closeEditOrderItemModal}/>
         </div>
-      </div>
+      </MainBackground>
     </div>
   );
 }
