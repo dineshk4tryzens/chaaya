@@ -146,8 +146,8 @@ export async function GetTodaysOrder() {
     {
       $match: {
         parsedOrderDate: {
-          $gte: startOfDay,
-          // $gte: new Date('2025-01-28T07:41:06.155Z'),
+          // $gte: startOfDay,
+          $gte: new Date('2025-02-07T07:41:06.155Z'),
           $lte: endOfDay,
         },
       },

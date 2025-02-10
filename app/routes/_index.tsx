@@ -11,6 +11,7 @@ import { Alert, IconButton, SvgIcon, SvgIconProps, Tooltip, tooltipClasses } fro
 import { Order } from "~/data/order";
 import { RepeatOrderModal } from "~/components/RepeatOrderModal";
 import { DrinkDetails } from "~/types/drink";
+import MainBackground from "~/components/main/Background";
 
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -120,111 +121,109 @@ export default function Index() {
 
   return (
     <div className={`flex h-screen flex-col`}>
-      <div
-        className={`flex h-screen flex-col bg-image-light bg-cover fixed overflow-y-scroll inset-0 z-10 transition-opacity duration-[750ms] ease-in-out opacity-95 visible bg-bottom md:bg-[cover] dark:bg-image-dark max-md:${(theme !== "dark") ? 'bg-x-0 bg-200-100' : 'bg-x-10 bg-170-100'}`}
-      >
-        <div className="h-auto z-20 mr-12 ml-12 max-sm:mr-5 max-sm:ml-5">
-          <NavBar>
-            <div className="flex w-full justify-between flex-wrap">
-              <div className="flex items-center gap-2 font-[Averta] flex-1">
-                <ThemeToggleButton
-                  isDark={theme === "dark"}
-                  onChange={() => toggleTheme()}
-                />
-                { name && <NavLink
-                  to={`/my-orders?user=${id}`}
-                  className={"underline underline-offset-4 p-2 rounded-lg bg-clip-border border border-solid border-transparent hover:backdrop-blur-sm dark:text-slate-300"}
-                >
-                  My Orders
-                </NavLink>}
-                <NavLink
-                  to={`/chaaya`}
-                  className={"underline underline-offset-4 p-2 rounded-lg bg-clip-border border border-solid border-transparent hover:backdrop-blur-sm dark:text-slate-300"}
-                >
-                  Todays Orders
-                </NavLink>
-                {showReorderLink &&
-                  <NavLink
-                    onClick={() => setShowRepeatOrderModal(true)}
-                    to={'/'}
+        <MainBackground theme={theme}>
+          <div className="h-auto z-20 mr-12 ml-12 max-sm:mr-5 max-sm:ml-5">
+            <NavBar>
+              <div className="flex w-full justify-between flex-wrap">
+                <div className="flex items-center gap-2 font-[Averta] flex-1">
+                  <ThemeToggleButton
+                    isDark={theme === "dark"}
+                    onChange={() => toggleTheme()}
+                  />
+                  { name && <NavLink
+                    to={`/my-orders?user=${id}`}
                     className={"underline underline-offset-4 p-2 rounded-lg bg-clip-border border border-solid border-transparent hover:backdrop-blur-sm dark:text-slate-300"}
                   >
-                    <div className="flex flex-row items-center">
-                      Repeat Last Order
-                      <Tooltip
-                        title={`Repeat your last order - ${repeatOrderDetails?.label}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          setShowReorderTooltip(!showReorderTooltip)
-                        }}
-                        open={showReorderTooltip}
-                        placement="bottom"
-                        slotProps={{
-                          popper: {
-                            sx: {
-                              [`&.${tooltipClasses.popper}[data-popper-placement*="bottom"] .${tooltipClasses.tooltip}`]:
-                                {
-                                  marginTop: '0px !important',
-                                },
-                            },
-                          },
-                        }}
-                      >
-                        <IconButton>
-                          <InfoIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </div>
+                    My Orders
+                  </NavLink>}
+                  <NavLink
+                    to={`/chaaya`}
+                    className={"underline underline-offset-4 p-2 rounded-lg bg-clip-border border border-solid border-transparent hover:backdrop-blur-sm dark:text-slate-300"}
+                  >
+                    Todays Orders
                   </NavLink>
-                }
+                  {showReorderLink &&
+                    <NavLink
+                      onClick={() => setShowRepeatOrderModal(true)}
+                      to={'/'}
+                      className={"underline underline-offset-4 p-2 rounded-lg bg-clip-border border border-solid border-transparent hover:backdrop-blur-sm dark:text-slate-300"}
+                    >
+                      <div className="flex flex-row items-center">
+                        Repeat Last Order
+                        <Tooltip
+                          title={`Repeat your last order - ${repeatOrderDetails?.label}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setShowReorderTooltip(!showReorderTooltip)
+                          }}
+                          open={showReorderTooltip}
+                          placement="bottom"
+                          slotProps={{
+                            popper: {
+                              sx: {
+                                [`&.${tooltipClasses.popper}[data-popper-placement*="bottom"] .${tooltipClasses.tooltip}`]:
+                                  {
+                                    marginTop: '0px !important',
+                                  },
+                              },
+                            },
+                          }}
+                        >
+                          <IconButton>
+                            <InfoIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </div>
+                    </NavLink>
+                  }
+                </div>
+                <div className="content-center">
+                  {/* // check user logged in and show username or register */}
+                  <UserName
+                    className="content-center font-[Averta] dark:text-slate-300"
+                    name={name}
+                  />
+                </div>
               </div>
-              <div className="content-center">
-                {/* // check user logged in and show username or register */}
-                <UserName
-                  className="content-center font-[Averta] dark:text-slate-300"
-                  name={name}
-                />
+            </NavBar>
+            {showAlert && (
+              <div className="sticky top-[7%] flex w-full mx-auto max-w-screen-xl py-2 lg:py-4 rounded-xl z-20 dark:text-white">
+                {success ? (
+                  <Alert className="w-full" severity="success" onClose={() => {}}>
+                    Success. ബാ ഇനി ഓരോ ചായ പിടിപ്പിക്കാം
+                  </Alert>
+                ) : (
+                  <Alert className="w-full" severity="error" onClose={() => {}}>
+                    This Alert displays the default close icon.
+                  </Alert>
+                )}
               </div>
-            </div>
-          </NavBar>
-          {showAlert && (
-            <div className="sticky top-[7%] flex w-full mx-auto max-w-screen-xl py-2 lg:py-4 rounded-xl z-20 dark:text-white">
-              {success ? (
-                <Alert className="w-full" severity="success" onClose={() => {}}>
-                  Success. ബാ ഇനി ഓരോ ചായ പിടിപ്പിക്കാം
-                </Alert>
-              ) : (
-                <Alert className="w-full" severity="error" onClose={() => {}}>
-                  This Alert displays the default close icon.
-                </Alert>
-              )}
-            </div>
-          )}
-          <MainContainer id={id} name={name} />
-          <RepeatOrderModal
-            modalOpen={showRepeatOrderModal || false}
-            modalClose={() => setShowRepeatOrderModal(false)}
-            onEmailSelected={() => 'setSelectedUserEmail'}
-            onEmpIdSelected={() => 'setSelectedUserEmpId'}
-            id={id}
-            label={repeatOrderDetails?.label}
-            onSubmit={() => {
-              if (!id || !repeatOrderDetails?.name) throw new Error('missing id or drink name');
-              const formData = new FormData();
-              formData.append("reorder", "true");
-              formData.append("id", id);
-              formData.append("drink", repeatOrderDetails.name);
-              setShowRepeatOrderModal(false);
-              submit(formData, {
-                method: "post",
-                encType: "application/x-www-form-urlencoded",
-                // navigate: false,
-              });
-            }}
-          ></RepeatOrderModal>
-        </div>
-      </div>
+            )}
+            <MainContainer id={id} name={name} />
+            <RepeatOrderModal
+              modalOpen={showRepeatOrderModal || false}
+              modalClose={() => setShowRepeatOrderModal(false)}
+              onEmailSelected={() => 'setSelectedUserEmail'}
+              onEmpIdSelected={() => 'setSelectedUserEmpId'}
+              id={id}
+              label={repeatOrderDetails?.label}
+              onSubmit={() => {
+                if (!id || !repeatOrderDetails?.name) throw new Error('missing id or drink name');
+                const formData = new FormData();
+                formData.append("reorder", "true");
+                formData.append("id", id);
+                formData.append("drink", repeatOrderDetails.name);
+                setShowRepeatOrderModal(false);
+                submit(formData, {
+                  method: "post",
+                  encType: "application/x-www-form-urlencoded",
+                  // navigate: false,
+                });
+              }}
+            ></RepeatOrderModal>
+          </div>
+        </MainBackground>
     </div>
   );
 }

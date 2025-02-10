@@ -263,7 +263,7 @@ export const ViewOrders = ({
                   ></Divider>
                   <div className="flex h-[500px] overflow-auto max-sm:text-xs">
                     <table className="border-collapse w-full text-left">
-                      <tbody key={0}>
+                      <tbody>
                         <tr className="!mb-3 sticky top-0 shadow-md backdrop-saturate-200 backdrop-blur-xl bg-neutral-200 z-20 dark:bg-slate-800">
                           <th className="font-bold uppercase">Item</th>
                           <th className="font-bold uppercase">Order Date</th>
@@ -285,7 +285,6 @@ export const ViewOrders = ({
                                 <DeleteIcon onClick={() => deleteOrderLi(data)}/>
                               </td>
                             </tr>
-                            <tr></tr>
                           </>
                         ))}
                       </tbody>
