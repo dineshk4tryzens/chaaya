@@ -107,8 +107,9 @@ export const MainContainer = ({ id, name }: { id?: string, name?: string }) => {
             ))}
           </div>
           <Button
-            className="w-[100%] max-w-52 mx-auto h-12 my-5 bg-[#1e293bb5] hover:bg-[#1e293b]"
+            className="!w-[100%] !max-w-52 !mx-auto !h-12 !my-5 !bg-[#1e293b] !text-slate-300"
             type="button"
+            fullWidth
             onClick={(e) => submitDrinkSelection(e)}
           >
             Proceed!
