@@ -1,7 +1,7 @@
-export interface RepeatOrderModalProps {
+export interface updateUPIIdModalProps {
   modalOpen: boolean;
-  label?: string;
   modalClose: (params?: boolean) => void;
   onSubmit: () => void;
+  onUpiIdSelected: (upiId: string) => void;
   id?: string;
 }
