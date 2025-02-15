@@ -1,4 +1,13 @@
-import { CheckForRepeatOrder, CreateOrder, DeleteOrderByItem, EditOrder, GetTodaysOrder, GetUserOrderDetails, RepeatOrderByUserId } from "~/db/order";
+import {
+  CheckForRepeatOrder,
+  CreateOrder,
+  DeleteOrderByItem,
+  EditOrder,
+  GetTodaysOrder,
+  GetUserOrderDetails,
+  RepeatOrderByUserId,
+  UpdateUpiIDByUserId
+} from "~/db/order";
 import { DrinkDetails } from "~/types/drink";
 import { OrderDetailsResponse } from "~/types/order";
 import { Constants } from "./constants";
@@ -33,6 +42,15 @@ export async function Order(request: Request) {
     })
     return order;
   }
+  if (formData?.get("updateUpi") === "true") {
+    const upiId = formData?.get("upiId") as string;
+    const id = formData?.get("id") as string;
+    const data = await UpdateUpiIDByUserId(id, upiId)
+    return {
+      success: data,
+      message: 'UPI Id updated successfully!'
+    }
+  }
   const id = formData.get("id") as string;
   const drink = formData.get("drink") as string;
   const email = formData.get("email") as string;
@@ -62,7 +80,17 @@ export async function DeleteOrder(id: string, deleteItemId: string) {
 
 export async function CheckIfRepeatOrderExists(id: string) {
   const data = await CheckForRepeatOrder(id)
-  return { ...Constants.Drinks?.[data as Drink], name: data };
+  if (!data) return false;
+  const repeatOrderData = {
+    ...Constants.Drinks?.[data?.repeatOrderData as Drink],
+    name: data?.repeatOrderData,
+    userData: {
+      email: data?.userData?.email,
+      empId: data?.userData?.empId,
+      upiId: data?.userData?.upiId ?? undefined
+    },
+  }
+  return { ...repeatOrderData };
 }
 
 export async function RepeatOrder(id: string, drink: string) {
@@ -70,7 +98,8 @@ export async function RepeatOrder(id: string, drink: string) {
   const data = await RepeatOrderByUserId(id, drinkDetails)
   return {
     data: {
-      success: data
+      success: data,
+      message: 'Success. ബാ ഇനി ഓരോ ചായ പിടിപ്പിക്കാം'
     },
     success: data
   };

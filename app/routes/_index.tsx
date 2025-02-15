@@ -7,21 +7,17 @@ import { ActionFunctionArgs } from "@remix-run/node";
 import ThemeToggleButton from "~/components/ThemeSwitcher";
 import useTheme from "~/hooks/useTheme";
 import { Alert, IconButton, SvgIcon, SvgIconProps, Tooltip, tooltipClasses } from "@mui/material";
-// import CreateOrder from "~/db/order";
 import { Order } from "~/data/order";
 import { RepeatOrderModal } from "~/components/RepeatOrderModal";
 import { DrinkDetails } from "~/types/drink";
 import MainBackground from "~/components/main/Background";
+import { RepeatOrderDetails } from "~/types";
+import { UpdateUpiIdModal } from "~/components/UpdateUpiIdModal";
 
 
 export async function action({ request }: ActionFunctionArgs) {
-  // const formData = await request.formData();
-  // const drink = formData.get('drink');
-  // const email = formData.get('email');
-  // console.log('form name', drink);
-  // console.log('form email', email);
-  const x = await Order(request);
-  return json({ data: x, success: x?.success || false });
+  const order = await Order(request);
+  return json({ data: order, success: order?.success || false });
 }
 
 export default function Index() {
@@ -33,7 +29,10 @@ export default function Index() {
   const [showReorderLink, setShowReorderLink] = useState<boolean>(false);
   const [showRepeatOrderModal, setShowRepeatOrderModal] = useState<boolean>(false);
   const [showReorderTooltip, setShowReorderTooltip] = useState<boolean>(false);
+  const [showUpdateUpiID, setShowUpdateUpiID] = useState<boolean>(false);
   const [repeatOrderDetails, setRepeatOrderDetails] = useState<DrinkDetails | undefined>();
+  const [userDetails, setUserDetails] = useState<RepeatOrderDetails | undefined>();
+  const [upiId, setUpiId] = useState<string | undefined>();
   const { theme, toggleTheme } = useTheme(windowObject as Window);
   const submit = useSubmit();
   const user = useActionData<{
@@ -42,16 +41,23 @@ export default function Index() {
       email?: string;
       name?: string;
       success?: boolean;
+      message?: string;
     };
     success: boolean;
   }>();
 
   useEffect(() => {
     if (id) {
-      CheckIfRepeatOrderExists(id).then((data: DrinkDetails) => setRepeatOrderDetails(data))
+      CheckIfRepeatOrderExists(id).then((data: RepeatOrderDetails) => (setRepeatOrderDetails(data), setUserDetails(data)))
       setShowReorderLink(true)
     }
   }, [id])
+
+  useEffect(() => {
+    if (userDetails && !userDetails?.userData?.upiId) {
+      setShowUpdateUpiID(true)
+    }
+  }, [userDetails])
 
   async function CheckIfRepeatOrderExists(userId: string) {
     try {
@@ -191,11 +197,11 @@ export default function Index() {
               <div className="sticky top-[7%] flex w-full mx-auto max-w-screen-xl py-2 lg:py-4 rounded-xl z-20 dark:text-white">
                 {success ? (
                   <Alert className="w-full" severity="success" onClose={() => {}}>
-                    Success. ബാ ഇനി ഓരോ ചായ പിടിപ്പിക്കാം
+                    { user?.data?.message ?? 'Success. ബാ ഇനി ഓരോ ചായ പിടിപ്പിക്കാം'}
                   </Alert>
                 ) : (
                   <Alert className="w-full" severity="error" onClose={() => {}}>
-                    This Alert displays the default close icon.
+                    Oops!!. Unable to process your request. Try again later!
                   </Alert>
                 )}
               </div>
@@ -204,8 +210,6 @@ export default function Index() {
             <RepeatOrderModal
               modalOpen={showRepeatOrderModal || false}
               modalClose={() => setShowRepeatOrderModal(false)}
-              onEmailSelected={() => 'setSelectedUserEmail'}
-              onEmpIdSelected={() => 'setSelectedUserEmpId'}
               id={id}
               label={repeatOrderDetails?.label}
               onSubmit={() => {
@@ -222,6 +226,25 @@ export default function Index() {
                 });
               }}
             ></RepeatOrderModal>
+            { id && showUpdateUpiID &&
+              <UpdateUpiIdModal
+                modalOpen={true}
+                modalClose={() => setShowRepeatOrderModal(false)}
+                onUpiIdSelected={setUpiId}
+                id={id}
+                onSubmit={() => {
+                  if (!id || !upiId) throw new Error('missing id or UPI Id');
+                  const formData = new FormData();
+                  formData.append("upiId", upiId);
+                  formData.append("id", id);
+                  formData.append("updateUpi", 'true');
+                  submit(formData, {
+                    method: "post",
+                    encType: "application/x-www-form-urlencoded",
+                  });
+                }}
+              />
+            }
           </div>
         </MainBackground>
     </div>

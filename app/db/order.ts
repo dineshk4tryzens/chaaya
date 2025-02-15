@@ -146,8 +146,8 @@ export async function GetTodaysOrder() {
     {
       $match: {
         parsedOrderDate: {
-          // $gte: startOfDay,
-          $gte: new Date('2025-02-07T07:41:06.155Z'),
+          $gte: startOfDay,
+          // $gte: new Date('2025-02-07T07:41:06.155Z'),
           $lte: endOfDay,
         },
       },
@@ -188,7 +188,11 @@ export async function CheckForRepeatOrder(id: string) {
   const userData = await connection.findOne({ id: new BSON.UUID(id) })
   if (!userData) throw new Error('Invalid user');
   if(!userData?.orderDetails || userData?.orderDetails?.length < 1) return false;
-  return userData.orderDetails.sort((a: OrderDetailsResponse, b: OrderDetailsResponse) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())[0].item
+  return {
+    repeatOrderData : userData.orderDetails
+      .sort((a: OrderDetailsResponse, b: OrderDetailsResponse) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())[0].item,
+    userData
+  }
 }
 
 export async function RepeatOrderByUserId(id: string, drinkDetails: DrinkDetails) {
@@ -213,6 +217,30 @@ export async function RepeatOrderByUserId(id: string, drinkDetails: DrinkDetails
           item: string, price: number, orderDate: string, id: BSON.UUID
         }[]
       }>,
+    }
+  );
+
+  console.log(
+    result.modifiedCount > 0
+      ? "Order added successfully."
+      : "No matching user found."
+  );
+
+  return result.modifiedCount > 0
+}
+
+export async function UpdateUpiIDByUserId(id: string, upiId: string) {
+  if (!id || !upiId) throw new Error('Missing UPI ID or User ID');
+  const connection = await Connection().then((e: unknown) => {
+    const schema = e as MongoClient;
+    return schema.db("sample_mflix").collection("TestNew");
+  });
+  if (!connection) throw new Error("connection illadeyyyyy");
+  // Update the user's record by pushing the new order to orderDetails
+  const result = await connection.updateOne(
+    { id: new BSON.UUID(id) }, // Find the record by id
+    {
+      $set: { upiId }
     }
   );
 
