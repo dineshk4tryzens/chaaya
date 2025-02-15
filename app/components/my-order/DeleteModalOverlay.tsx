@@ -1,7 +1,6 @@
-import { Alert, Box, CircularProgress, Divider, Snackbar, Stack, Typography } from "@mui/material";
+import { Alert, Box, CircularProgress, Divider, Snackbar, Stack, Typography, Button } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { DeleteModalOverlayProps } from "~/types/components/deleteModalOverlayProps";
-import Button from '@mui/material/Button';
 import DeleteIcon from "../icons/Delete";
 
 export const DeleteModalOverlay = (props?: DeleteModalOverlayProps) => {
