@@ -81,9 +81,9 @@ const hydrate = () => {
           {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
           <CssBaseline />
           <StrictMode>
-            <Suspense fallback={<div>Loading...</div>}>
+            {/* <Suspense fallback={<div>Loading...</div>}> */}
               <RemixBrowser />
-            </Suspense>
+            {/* </Suspense> */}
           </StrictMode>
         </ThemeProvider>
       </ClientCacheProvider>,

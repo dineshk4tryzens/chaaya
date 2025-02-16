@@ -1,7 +1,6 @@
-import { Alert, Box, CircularProgress, Divider, Snackbar, Stack, Typography } from "@mui/material";
+import { Alert, Box, CircularProgress, Divider, Snackbar, Stack, Typography, Button } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { DeleteModalOverlayProps } from "~/types/components/deleteModalOverlayProps";
-import Button from '@mui/material/Button';
 import DeleteIcon from "../icons/Delete";
 
 export const DeleteModalOverlay = (props?: DeleteModalOverlayProps) => {
@@ -67,6 +66,7 @@ export const DeleteModalOverlay = (props?: DeleteModalOverlayProps) => {
                   }}
                   className="dark:!bg-[#e4dbe954] !text-[#CBD5E1] !border-[#CBD5E1] disabled:!border-0"
                   variant="outlined"
+                  fullWidth
                   startIcon={props?.deleting?.start !== true ? <DeleteIcon/>: <CircularProgress color={"inherit"} size={30} />}
                   disabled={props?.deleting?.start === true || props?.deleting?.success === true}
                   onClick={() => props?.setSubmitDeleteDrink(true)}
@@ -76,6 +76,7 @@ export const DeleteModalOverlay = (props?: DeleteModalOverlayProps) => {
                 <Button
                   className="dark:!bg-[#e4dbe954] !text-[#CBD5E1] !border-[#CBD5E1] disabled:!border-0"
                   variant="outlined"
+                  fullWidth
                   onClick={() => props?.setOpenDeleteModal(false)}
                 >
                   Cancel
